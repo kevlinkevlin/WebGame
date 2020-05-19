@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <title>打地鼠</title>
+   
+</head>
+
+<body>
+<style>
+/*匯入Google fonts*/
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:200,300,400);
+ *{
+    margin: 0;
+    padding: 0;
+}
+
+.title{
+    margin:20px auto;
+    text-align: center;
+}
+body {
+    font-size: 2vh;
+    font-family: 'Yanone Kaffeesatz',"微软雅黑","华文细黑",Arial, Helvetica, sans-serif;
+}
+
+#game_panel {
+    cursor: url('./images/chuizi.ico'), default;
+    position:absolute;
+    left:50%;
+    top:99%;  /*100%最下方格子會跑掉*/    
+    transform: translate(-50%,-100%);
+}
+
+.box {
+    position:absolute;
+    border:1px solid #ccc;
+    background: url("./images/hurt.jpg") no-repeat;
+    background-size:cover;
+}
+.cat_gold {
+    position:absolute;
+    border:1px solid #ccc;
+    background: url("./images/up.gif");
+    background-size: 100% 100%;
+}
+.cat_silver {
+    position:absolute;
+    border:1px solid #ccc;
+    background: url("./images/up.gif") no-repeat;
+    background-size: 100% 100%;
+}
+.cat_bronze {
+    position:absolute;
+    border:1px solid #ccc;
+    background: url("./images/up.gif") no-repeat;
+    background-size: 100% 100%;
+}
+.cat_red {
+    position:absolute;
+    border:1px solid #ccc;
+    background: url("./images/up.gif") no-repeat;
+    background-size: 100% 100%;
+}
+
+.diglett_down {
+    position:absolute;
+    border:1px solid #ccc;
+    background: url("./images/down.jpg") no-repeat;
+    background-size: 100% 100%;
+}
+.left {
+    position: absolute;
+    left: 8%;
+    top: 5%;
+    width:10%;
+    height:30%;
+    background: #ccc;
+    padding:10px 0 10px 0;
+    text-align: center;
+}
+.left p {
+    display:inline-block;
+    text-align: center;
+}
+.right {
+    position: absolute;
+    width:15%;
+    height:40%;
+    background: #ccc;
+    right:5%;
+    top:20%;
+    padding:20px 0 20px 0;
+    text-align: center;
+}
+.right p {
+    text-align: center;
+}
+.right input {
+    background:lightskyblue;
+}
+#button {
+    position:absolute;
+    display:block;
+    background-image:url(./images/up.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin:0 auto;
+    width:100px;
+    height:100px;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+}
+/*遊戲結束時遮罩*/
+#transparent{
+    position:absolute;
+    display:block;
+    opacity:0;
+    background-image:url(./images/up.jpg);
+    background-size: cover;
+    background-repeat:repeat;
+     width:100%;
+    height:100%;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+}   
+
+/*計時器*/
+.game_time{
+    position:absolute;
+    width:100px;
+    height:100px;
+    top:10%;
+    left:50%;
+    text-align:center;
+    transform: translate(-50%,-50%);
+}
+/*計時器外圈*/
+.clock {
+  position: absolute;
+  width:100%;
+  height:100%;
+  z-index: 5;
+  border: 10px solid #92cbd9;
+  /*border-bottom-color: red;*/
+  border-radius: 50%;
+  top:50%;
+  left:50%;
+  transform: translate(-50%,-50%);
+}
+/*計時器內圈*/
+.bg{width:100%;
+    height:100%;
+    border-radius:50%;
+    position:absolute;
+    background-color:#d13c36;
+    }
+/*時間數字*/
+.time{width:80%;
+    height:80%;
+    margin:10% 0 0 10%;
+    background-color:#e45534;
+    border-radius:50%;
+    position:absolute;
+    z-index:1;
+    font-size: 2rem;
+    text-align:center;
+
+    }
+.time:before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+/*內圈*/
+.pie{width:100%;
+    height:100%;
+    border-radius:50%;
+    position:absolute;
+    }
+/*內圈右半圓*/
+.pie1{
+    /*clip:rect(0px,200px,200px,100px);*/
+    clip-path:inset(0% 0% 0% 50% round 0% 50% 50% 0%);
+    -o-transform:rotate(0deg);
+    -moz-transform:rotate(0deg);
+    -webkit-transform:rotate(0deg);
+    background-color:#fff;
+    }
+/*內圈左半圓*/
+.pie2{
+    /*clip:rect(0px,100px,200px,0px);*/
+    clip-path:inset(0% 50% 0% 0% round 50% 0% 0% 50%);
+    -o-transform:rotate(0deg);
+    -moz-transform:rotate(0deg);
+    -webkit-transform:rotate(0deg);
+    background-color:#fff;
+    }
+.hold{width:100%;
+    height:100%;
+    position:absolute;
+    z-index:1;
+    }
+</style>
+    <h1 class="title"></h1>
+    <canvas id="canvas"></canvas>
+    
+
+    <div id="game_panel"></div>
+    <div id="transparent"></div>
+    <input type="button" id="button"></button>
+
+    <div class="left">
+        
+        <p>分數</p><br>
+        <p id="score">0</p><br><br>
+        <p>所有的地鼠</p><br>
+        <p id="all_dig">0</p><br><br>
+        <p></p><br>
+        <p id="time_pass"></p><br><br>
+    </div>
+
+    <div class="game_time">
+    <div class="clock"></div>
+    <div class="hold">
+        <div class="pie pie1"></div>
+    </div>
+
+    <div class="hold">
+        <div class="pie pie2"></div>
+    </div>
+    <div class="bg"> </div>
+    <div class="time"></div>
+    </div>
+<script  type="text/javascript" src="test.js"></script>
+<script type="text/javascript">
+var canvas = document.getElementsByTagName("canvas")[0];
+canvas.width = 1000;
+canvas.height = 1000;
+var context = canvas.getContext('2d');
+var faceImage = new Image();
+requestAnimationFrame(draw);
+faceImage.src = "./images/image1.png";
+var Face = {
+    sx:0,
+    sy:0,
+    dx:0,
+    dy:0,
+    spriteW:32,
+    spriteH:32,
+    w:32,
+    h:32,
+    frames:1,
+    cols:1,
+    rows:1,
+    currentFrame:0,
+    currentCols:0,
+    updateFrames:function(){
+    if(this.currentFrame % 10 == 0)
+    {
+    this.currentCols++;
+    this.sy = Math.floor(this.currentCols % this.rows) * this.spriteW;
+    }
+    this.sx = Math.floor((this.currentFrame)  % this.cols) * this.spriteW;
+    this.currentFrame = (this.currentFrame+0.5) % (this.frames);
+    },
+
+    move:function(){
+
+    },
+
+    display:function(){
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(
+            faceImage,
+            this.sx,this.sy,this.spriteW,this.spriteH,
+            this.dx,this.dy,this.w,this.h
+            );
+    }
+};
+var face = Object.create(Face);
+face.sx = 0;
+face.sy = 0;
+face.dx = 0;
+face.dy = 0;
+face.spriteW = 180;
+face.spriteH = 180;
+face.w = 180;
+face.h = 180;
+face.frames = 30;
+face.cols = 10;
+face.rows = 3;
+delete Face;
+function draw(){
+    face.updateFrames();
+    face.display();
+    requestAnimationFrame(draw);
+
+}
+
+</script> 
+</body>
+</html>
